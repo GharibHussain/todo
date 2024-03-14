@@ -1,17 +1,31 @@
 const BACKEND_ROOT_URL = 'http://localhost:3001'
+import { Todos } from "./class/Todos.js"
+
+const todos = new Todos(BACKEND_ROOT_URL)
 
 const list = document.querySelector('ul')
 const input = document.querySelector('input')
 
 const renderTask = (task) => {
+    console.log(task)
     const li = document.createElement('li')
     li.setAttribute('class', 'list-group-item')
-    li.innerHTML = task
+    li.innerHTML = task.getText()
     list.append(li)
 }
 
 // http get
 const getTasks = async () => {
+
+    todos.getTasks().then((tasks) => {
+        tasks.forEach((currentTask) => {
+            renderTask(currentTask)
+        })
+    }).catch((error) => {
+        alert(error)
+    })
+
+    /** Without the Todos class, we could send the lrequest this way
     try {
         const response = await fetch(BACKEND_ROOT_URL)
         const json = await response.json() // a json array of tasks
@@ -19,15 +33,17 @@ const getTasks = async () => {
         json.forEach(task => {
             renderTask(task.description)
         });
-        
         input.disabled = false
     } catch (error) {
         alert('Error retrieving tasks ' + error.message)
     }
+    */
 }
 
 // http post 
-const saveTask = async (task) => {
+/**
+const saveTask = async (text) => {
+    
     try {
         const json = JSON.stringify({description: task})    // json data to be sent to server
 
@@ -42,17 +58,21 @@ const saveTask = async (task) => {
     } catch (error) {
         alert('Error saving task: ' + error.message)
     } 
+
+
 }
+*/
 
 input.addEventListener('keypress', (event) => {
     if (event.key === 'Enter') {
         event.preventDefault()
-        const task = input.value.trim()
-        if (task !== ''){
-            saveTask(task).then((json) => { // the return value of saveTask (the json data of the response)
-                renderTask(task)
+        const taskText = input.value.trim()
+        if (taskText !== '') {
+            todos.saveTask(taskText).then((task) => {
+                renderTask(task)    // the task object is passed
                 input.value = ''
-            })  
+                input.focus()
+            }) 
         }
     }
 })
