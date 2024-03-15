@@ -1,4 +1,6 @@
+
 import { Task } from "./Task.js"
+
 
 class Todos {
     #tasks = []
@@ -56,6 +58,27 @@ class Todos {
             })
         }
         )
+    }
+
+    #removeFromArray(id) {
+        const arrayWithoutRemoved = this.#tasks.filter((task) => task.getId() !== id)
+        this.#tasks = arrayWithoutRemoved
+    }
+
+    // send a DELETE request to server
+    removeTask = (id) => {
+        return new Promise(async (resolve, reject) => {
+            fetch(this.#backend_url + '/delete/' + id, {
+                method: 'delete'
+            })
+            .then((response) => response.json())
+            .then((json) => {
+                this.#removeFromArray(id)
+                resolve(json.id)    // if successful, return json.id
+            }, (error) => {
+                reject(error)       // if failed, return error
+            })
+        })
     }
 }
 
